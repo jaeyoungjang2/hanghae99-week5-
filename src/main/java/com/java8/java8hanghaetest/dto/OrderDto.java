@@ -13,6 +13,7 @@ public class OrderDto {
     private String restaurantName;
     private List<FoodOrderDto> foods = new ArrayList<>();
     private Long deliveryFee;
+    private Long premiumDeliveryFee;
     private Long totalPrice;
 
     public OrderDto(Order order) {
@@ -24,8 +25,9 @@ public class OrderDto {
             foods.add(foodOrderDto);
         }
 
-        this.deliveryFee = order.getDeliveryFee();
-        this.totalPrice = order.getTotalPrice();
+        this.deliveryFee = order.getBaseDeliveryFee();
+        this.premiumDeliveryFee = order.getPremiumDeliveryFee();
+        this.totalPrice = order.getTotalPrice() + this.deliveryFee + this.premiumDeliveryFee;
     }
 
 

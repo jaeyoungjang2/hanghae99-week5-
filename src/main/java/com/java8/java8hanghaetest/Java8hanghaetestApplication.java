@@ -9,5 +9,4 @@ public class Java8hanghaetestApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(Java8hanghaetestApplication.class, args);
 	}
-
 }

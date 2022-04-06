@@ -1,13 +1,21 @@
 package com.java8.java8hanghaetest.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,9 +32,19 @@ public class Food {
     private Long price;
     private Long orderCount;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
+
+    private boolean run;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL)
+    private List<Option> options = new ArrayList<>();
+
+    @OneToMany
+    private Set<Category> categories = new HashSet<>();
 
     public Food(String foodName, Long foodPrice, Restaurant restaurant) {
         // 음식 등록 가격 확인
@@ -35,6 +53,7 @@ public class Food {
         this.name = foodName;
         this.price = foodPrice;
         this.orderCount = 0L;
+        this.run = false;
         setRestaurant(restaurant);
     }
 
@@ -57,5 +76,22 @@ public class Food {
 
     public void addOrderCount(Long foodQuantity) {
         this.orderCount += foodQuantity;
+    }
+
+    public void soldOut() {
+        this.run = false;
+    }
+
+    public void ready() {
+        this.run = true;
+    }
+
+    public void addCategory(Category category) {
+        this.categories.add(category);
+        this.restaurant.getCategories().add(category);
+    }
+
+    public void addOption(Option option) {
+        this.options.add(option);
     }
 }

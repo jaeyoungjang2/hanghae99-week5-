@@ -6,6 +6,8 @@ import com.java8.java8hanghaetest.model.Food;
 import com.java8.java8hanghaetest.model.Restaurant;
 import com.java8.java8hanghaetest.repository.FoodRepository;
 import com.java8.java8hanghaetest.repository.RestaurantRepository;
+import com.java8.java8hanghaetest.util.Constants;
+import java.util.ArrayList;
 import java.util.List;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -14,21 +16,25 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class RestaurantService {
-
     private final RestaurantRepository restaurantRepository;
     private final FoodRepository foodRepository;
 
     public Restaurant enroll(RestaurantDto restaurantDto) {
-        Restaurant restaurant = new Restaurant(restaurantDto);
 
-        Long minOrderPrice = restaurant.getMinOrderPrice();
-        Long deliveryFee = restaurant.getDeliveryFee();
+
+        Long minOrderPrice = restaurantDto.getMinOrderPrice();
+        Long deliveryFee = restaurantDto.getDeliveryFee();
 
         // 주문 금액 확인
         checkMinOrderPrice(minOrderPrice);
         // 배달 금액 확인
         checkValidDeliveryFee(deliveryFee);
 
+        // 음식점 주인 확인
+//        if (!user.getRole().equals(UserRoleEnum.ADMIN)) {
+//            throw new IllegalArgumentException("음식점 주인만 음식점을 등록할 수 있습니다.");
+//        }
+        Restaurant restaurant = new Restaurant(restaurantDto);
         return restaurantRepository.save(restaurant);
     }
 
@@ -63,6 +69,7 @@ public class RestaurantService {
     @Transactional
     public void registFood(Long restaurantId, List<RestaurantFoodDto> restaurantFoodDtos) {
         // 음식과 음식가격을 받아서 레스토랑에 등록한다. (레스토랑은 restaurantId로 찾는다.)
+        List<Food> foods = new ArrayList<>();
         for (RestaurantFoodDto restaurantFoodDto : restaurantFoodDtos) {
             String foodName = restaurantFoodDto.getName();
             Long foodPrice = restaurantFoodDto.getPrice();
@@ -75,7 +82,7 @@ public class RestaurantService {
 
             // 중복된 음식이 없으면 저장
             Food food = new Food(foodName, foodPrice, restaurant);
-            foodRepository.save(food);
+            foods.add(foodRepository.save(food));
         }
     }
 
@@ -89,14 +96,54 @@ public class RestaurantService {
         }
     }
 
-
-
     public List<Food> getMenu(Long restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId).orElseThrow(
             () -> new IllegalArgumentException("입력하신 레스토랑이 존재하지 않습니다.")
         );
 
         return restaurant.getFoods();
+    }
 
+    public List<Restaurant> getTargetRestaurant(Long x, Long y) {
+        List<Restaurant> acceptable_restaurant_list = new ArrayList<>();
+        List<Restaurant> allRestaurant = restaurantRepository.findAll();
+        for (Restaurant restaurant : allRestaurant) {
+            // x, y 로 부터 3km이내에 있는 레스토랑만 검색
+            Long restaurantX = restaurant.getX();
+            Long restaurantY = restaurant.getY();
+            long distanceFromRestaurant = Math.abs(restaurantX - x) + Math.abs(restaurantY - y);
+            if (distanceFromRestaurant <= Constants.ACCEPTABLE_DELIVERY_DISTANCE) {
+                acceptable_restaurant_list.add(restaurant);
+            }
+        }
+        return acceptable_restaurant_list;
+    }
+
+    @Transactional
+    public Restaurant close(Long restaurantId) {
+        Restaurant restaurant = findRestaurant(restaurantId);
+//        isRestaurantOwner(user, restaurant);
+        restaurant.close();
+        return restaurant;
+    }
+
+    @Transactional
+    public Restaurant open(Long restaurantId) {
+        Restaurant restaurant = findRestaurant(restaurantId);
+//        isRestaurantOwner(user, restaurant);
+        restaurant.open();
+        return restaurant;
+    }
+
+//    private void isRestaurantOwner(User user, Restaurant restaurant) {
+//        if (!restaurant.getUser().getId().equals(user.getId())) {
+//            throw new IllegalArgumentException("음식점 주인만 음식점 상태를 변경할 수 있습니다.");
+//        }
+//    }
+
+    private Restaurant findRestaurant(Long restaurantId) {
+        return restaurantRepository.findById(restaurantId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 음식점 입니다.")
+            );
     }
 }

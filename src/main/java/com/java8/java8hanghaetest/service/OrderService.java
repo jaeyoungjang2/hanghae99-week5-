@@ -61,14 +61,10 @@ public class OrderService {
             // 주문한 메뉴와 수량 저장
             OrderFood orderFood = new OrderFood(food, foodQuantity, restaurant.getDeliveryFee());
             orderFoods.add(orderFood);
-            System.out.println("order foods size");
-            System.out.println(orderFoods.size());
         }
-        System.out.println("total order oods size");
-        System.out.println(orderFoods.size());
-        Order order = new Order(orderFoods, restaurant);
-        orderRepository.save(order);
 
+        Order order = new Order(orderFoods, restaurant, orderRequestDto);
+        orderRepository.save(order);
 
         OrderDto orderDto = new OrderDto(order);
         return orderDto;

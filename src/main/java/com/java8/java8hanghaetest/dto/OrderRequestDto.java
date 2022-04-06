@@ -10,4 +10,7 @@ import lombok.Setter;
 public class OrderRequestDto {
     private Long restaurantId;
     private List<FoodOrderRequestDto> foods = new ArrayList<>();
+    // 주문자의 위치
+    private Long x;
+    private Long y;
 }

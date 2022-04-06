@@ -1,5 +1,6 @@
 package com.java8.java8hanghaetest.dto;
 
+import com.java8.java8hanghaetest.model.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,10 +11,12 @@ public class RestaurantDto {
     private String name;
     private Long minOrderPrice;
     private Long deliveryFee;
+    // 음식점의 위치
+    private Long x;
+    private Long y;
 
-    public RestaurantDto(String name, Long minOrderPrice, Long deliveryFee) {
-        this.name = name;
-        this.minOrderPrice = minOrderPrice;
-        this.deliveryFee = deliveryFee;
-    }
+    // 음식점 주인
+    private User user;
+    // 영업 상태
+    private boolean run;
 }
